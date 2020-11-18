@@ -41,20 +41,13 @@
 //CLOSE_DOT_FILL          11
 //USER_FILL               12
 
-bool gameOver = false;
-
-void endGame()
-{
-    gameOver = true;
-    cleardevice();
-}
-
 int main()
 {
+    bool gameOver = false;
     short refRate = 50;
     short speed = 5;
-    unsigned short x[200];
-    unsigned short y[200];
+    short x[200];
+    short y[200];
     x[0] = 200;
     y[0] = 200;
     short length = 1;
@@ -63,17 +56,20 @@ int main()
     short foodX = 200;
     short foodY = 200;
     short score = -1;
-    initwindow(800, 600, "Snake");
+    initwindow(800, 600, "Snake", 200, 100);
     srand(time(NULL));
+
+    short width = getwindowwidth();
+    short height = getwindowheight();
 
     while(!gameOver){
         setfillstyle(SOLID_FILL, BLACK);
         bar(0, 0, 800, 600); // Screen
         setfillstyle(SOLID_FILL, RED);
-        bar(0, 0, 800, 10); // Top bar
-        bar(0,0, 10, 600); // Left bar
-        bar(0, 600, 800, 600 - 10); // Bottom bar
-        bar(790, 10, 800, 600); // Right bar
+        bar(0, 0, width, 10); // Top bar
+        bar(0,0, 10, height); // Left bar
+        bar(0, height, width, height - 40); // Bottom bar
+        bar(width - 15, 10, width, height); // Right bar
         // FOOD GENERATOR
         setfillstyle(SOLID_FILL, YELLOW);
         if(x[0] == foodX && y[0] == foodY){
@@ -103,8 +99,10 @@ int main()
         bar(foodX, foodY, foodX + 10, foodY + 10);
 
         if(score == 200){
-            endGame();
+            gameOver = true;
             std::cout << "You Win!" << std::endl;
+            closegraph();
+            break;
         }
 
         switch(score)
@@ -174,25 +172,30 @@ int main()
             bar(x[i], y[i], x[i] + 10, y[i] + 10);
         }
 
+        setfillstyle(SOLID_FILL, GREEN);
+        bar(x[0], y[0], x[0] + 10, y[0] + 10);
         delay(refRate);
+        swapbuffers(); // Prevents buffering
+
         // Self collision
         for(int i = 2; i < length; i++){
             if(x[0] == x[i] && y[0] == y[i])
             {
-                endGame();
-                std::cout << "GAME OVER" << std::endl << "Your score is: " << score << std::endl;
+                gameOver = true;
+                std::cout << "GAME OVER!, you collided with yourself" << std::endl << "Your score is: " << score << std::endl;
+                closegraph();
+                break;
             }
         }
-        setfillstyle(SOLID_FILL, GREEN);
-        bar(x[0], y[0], x[0] + 10, y[0] + 10);
 
         // Collision against walls
-        if(x[0] >= 780/*right*/ || x[0] <= 10 /*left*/|| y[0] <= 10/*top*/ || y[0] >= 580/*bottom*/)
+        if(x[0] >= width - 30/*right*/ || x[0] <= 10 /*left*/|| y[0] <= 10/*top*/ || y[0] >= height - 50/*bottom*/)
         {
-            endGame();
-            std::cout << "GAME OVER" << std::endl << "Your score is: " << score << std::endl;
+            gameOver = true;
+            std::cout << "GAME OVER!, you collided with the walls" << std::endl << "Your score is: " << score << "\n" << std::endl;
+            closegraph();
+            break;
         }
-        swapbuffers(); // Prevents buffering
     }
     system("pause");
     return 0;
